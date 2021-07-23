@@ -1,0 +1,4 @@
+name: JW_PianoPlayer
+version: ${project.version}
+main: jw.pianoplayer.Main
+api-version: 1.17
