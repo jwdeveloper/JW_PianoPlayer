@@ -1,7 +1,9 @@
 package jw.pianoplayer.piano;
 
-import jw.pianoplayer.Main;
-import jw.pianoplayer.data.Settings;
+import jw.pianoplayer.events.PianoEvent;
+import jw.pianoplayer.services.SettingsService;
+import jw.spigot_fluent_api.initialization.FluentPlugin;
+import jw.spigot_fluent_api.tasks.FluentTasks;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,130 +16,109 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PianoKey implements PianoEvent
-{
-    private final Settings settings;
+public class PianoKey implements PianoEvent {
+
+    private final SettingsService settingsService;
     private final List<Block> blocks;
     private final Plugin plugin;
-    private Location location;
-    private boolean isBlack = false;
-    private Light lightBlockData;
-    private Block lightBlock;
-    public PianoKey(Settings settings,Location location,boolean isBlack)
-    {
-        this.plugin  = Main.getPlugin(Main.class);
-        this.settings =settings;
+    private final Location location;
+    private final Light lightBlockData;
+    private final Block lightBlock;
+    private final boolean isBlack;
+
+    public PianoKey(SettingsService settingsService, Location location, boolean isBlack) {
+        this.settingsService = settingsService;
         this.location = location;
         this.isBlack = isBlack;
         this.blocks = new ArrayList<>();
-        lightBlock= location.clone().add(0,1,0).getBlock();
+        this.plugin = FluentPlugin.getPlugin();
+        lightBlock = location.clone().add(0, 1, 0).getBlock();
         lightBlock.setType(Material.LIGHT);
-        lightBlockData = (Light)lightBlock.getBlockData();
+        lightBlockData = (Light) lightBlock.getBlockData();
         setLightLevel(0);
-        LoadKey();
+        loadKey();
     }
-
-
-
 
     @Override
-    public void OnKeyPress(boolean isDown, int number, int velocity, int channel)
-    {
-        if(isDown)
-            OnPressDown(number,velocity,channel);
+    public void onKeyPress(boolean isDown, int number, int velocity, int channel) {
+        if (isDown)
+            onPressDown(number, velocity, channel);
         else
-            OnPressUp(number,velocity,channel);
+            onPressUp(number, velocity, channel);
     }
 
-    private void OnPressDown(int number, int velocity, int channel)
-    {
+    private void onPressDown(int number, int velocity, int channel) {
         Bukkit.getScheduler().runTask(plugin, () ->
         {
-            if(settings.isLightEnable)
-            {
+            if (settingsService.getIsLightEnableBind().get()) {
                 setLightLevel(15);
             }
-            for(Block b:blocks)
-            {
-                b.setType(isBlack?settings.keyDarkPress:settings.keyWhitePress);
-            }
-        });
-    }
-    private void OnPressUp(int number, int velocity, int channel)
-    {
-        Bukkit.getScheduler().runTask(plugin, () ->
-        {
-            setLightLevel(0);
-            for(Block b:blocks)
-            {
-                b.setType(isBlack?settings.keyDarkRelese:settings.keyWhiteRelese);
+            for (Block b : blocks) {
+                b.setType(isBlack ? settingsService.getKeyWhiteReleaseBind().get() : settingsService.getKeyWhitePressBind().get());
             }
         });
     }
 
-    public void Reset()
-    {
-        OnPressUp(0,0,0);
-        setLightLevel(0);
-    }
-    public void Reset(Material material)
-    {
-        OnPressUp(0,0,0);
-        setLightLevel(0);
-    }
-    public void RemoveKey()
-    {
-        Bukkit.getScheduler().runTask(plugin, () ->
+    private void onPressUp(int number, int velocity, int channel) {
+        FluentTasks.task(unused ->
         {
-            if(isBlack)
+            setLightLevel(0);
+            for (Block b : blocks)
             {
-                location.clone().add(1,-1,0).getBlock().setType(Material.AIR);
+                b.setType(isBlack ? settingsService.getKeyDarkPressBind().get() :  settingsService.getKeyDarkReleaseBind().get());
             }
-            for(Block b:blocks)
-            {
+        });
+    }
+
+    public void removeKey() {
+        FluentTasks.task(unused ->
+        {
+            if (isBlack) {
+                location.clone().add(0, -1, 0).getBlock().setType(Material.AIR);
+            }
+            for (Block b : blocks) {
                 b.setType(Material.AIR);
             }
             blocks.clear();
         });
-
     }
 
-    private void LoadKey()
-    {
+
+    public void Reset() {
+        onPressUp(0, 0, 0);
+        setLightLevel(0);
+    }
+    private void loadKey() {
         World world = location.getWorld();
-        if(isBlack)
-            location.add(new Vector(0,1,0));
+        if (isBlack)
+            location.add(new Vector(0, 1, 0));
 
         Location loc = location.clone();
-        for(int i=0;i<4;i++)
-        {
-            if(isBlack)
-            {
-                if(i==0)
-                {
-                    world.getBlockAt(loc.add(0,-1,0)).setType(settings.keyWhiteRelese);
-                    loc.add(0,1,0);
-                }
-                else
-                {
-                    world.getBlockAt(loc).setType(settings.keyDarkRelese);
+        for (int i = 0; i < 4; i++) {
+            if (isBlack) {
+                if (i == 0) {
+                    world.getBlockAt(loc.add(0, -1, 0))
+                            .setType(settingsService.getKeyWhiteReleaseBind().get());
+                    loc.add(0, 1, 0);
+                } else {
+                    world.getBlockAt(loc)
+                            .setType(settingsService.getKeyDarkPressBind().get());
                     blocks.add(world.getBlockAt(loc));
                 }
-            }
-            else
-            {
-                world.getBlockAt(loc).setType(settings.keyWhiteRelese);
+            } else {
+                world.getBlockAt(loc)
+                        .setType(settingsService.getKeyWhiteReleaseBind().get());
                 blocks.add(world.getBlockAt(loc));
             }
 
-            loc.add(new Vector(1,0,0));
+            loc.add(new Vector(1, 0, 0));
         }
     }
 
-    public void setLightLevel(int level)
-    {
+    public void setLightLevel(int level) {
         lightBlockData.setLevel(level);
         lightBlock.setBlockData(lightBlockData);
     }
+
 
 }

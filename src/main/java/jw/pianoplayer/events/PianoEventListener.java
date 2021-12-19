@@ -1,42 +1,53 @@
 package jw.pianoplayer.events;
 
-import jw.pianoplayer.Main;
-import jw.pianoplayer.piano.PianoPlayer;
+import jw.pianoplayer.services.PianoPlayerService;
+import jw.pianoplayer.services.SettingsService;
+import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.events.EventBase;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 
 import java.util.HashMap;
 import java.util.function.Consumer;
 
-public class PianoEventListener implements Listener {
+@SpigotBean(lazyLoad = false)
+public class PianoEventListener extends EventBase
+{
+    private final HashMap<Player, Consumer<Block>> playerConsumerHashMap;
+    private final PianoPlayerService pianoPlayerService;
+    private final SettingsService settingsService;
 
+    public PianoEventListener(PianoPlayerService pianoPlayerService, SettingsService settingsService)
+    {
+        playerConsumerHashMap = new HashMap<>();
+        this.pianoPlayerService = pianoPlayerService;
+        this.settingsService =settingsService;
+    }
 
-    private final HashMap<Player, Consumer<Block>> playerConsumerHashMap = new HashMap<>();
+    @Override
+    public void onPluginStart(PluginEnableEvent event) {
+        pianoPlayerService.createPiano(settingsService.getLocationBind().get());
+    }
+
+    @Override
+    public void onPluginStop(PluginDisableEvent event) {
+        pianoPlayerService.destroyPiano();
+    }
 
     @EventHandler
-    public void OnPlayerClick(BlockBreakEvent blockBreakEvent) {
-        if (playerConsumerHashMap.containsKey(blockBreakEvent.getPlayer())) {
-            Consumer<Block> event = playerConsumerHashMap.get(blockBreakEvent.getPlayer());
-            playerConsumerHashMap.remove(blockBreakEvent.getPlayer());
-            blockBreakEvent.setCancelled(true);
-            event.accept(blockBreakEvent.getBlock());
+    public void onPlayerClick(BlockBreakEvent event) {
+        if (playerConsumerHashMap.containsKey(event.getPlayer())) {
+            var action = playerConsumerHashMap.get(event.getPlayer());
+            playerConsumerHashMap.remove(event.getPlayer());
+            action.accept(event.getBlock());
+            event.setCancelled(true);
         }
     }
-    @EventHandler
-    public void OnPluginDisable(PluginDisableEvent pluginDisableEvent)
-    {
-         if(pluginDisableEvent.getPlugin() == Main.getPlugin(Main.class))
-         {
-             PianoPlayer player =   Main.getPlugin(Main.class).pianoPlayer;
-             player.Stop();
-             player.Destroy();
-         }
-    }
-    public void AddPlayerBlockListener(Player player, Consumer<Block> consumer) {
+    public void addPlayerBlockListener(Player player, Consumer<Block> consumer) {
         if (!playerConsumerHashMap.containsKey(player))
             playerConsumerHashMap.put(player, consumer);
     }
