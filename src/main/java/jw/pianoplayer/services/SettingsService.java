@@ -2,6 +2,7 @@ package jw.pianoplayer.services;
 
 import jw.pianoplayer.data.Settings;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.initialization.FluentPlugin;
 import jw.spigot_fluent_api.utilites.binding.Observable;
 import jw.spigot_fluent_api.utilites.files.FileUtility;
 import lombok.Getter;
@@ -45,6 +46,6 @@ public class SettingsService {
     }
 
     public String midiFilesPath() {
-        return FileUtility.pluginsPath();
+        return FluentPlugin.getPath();
     }
 }

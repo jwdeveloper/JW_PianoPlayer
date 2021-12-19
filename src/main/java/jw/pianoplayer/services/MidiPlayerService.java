@@ -44,20 +44,20 @@ public class MidiPlayerService {
 
     public void setOnNotePressed(MidiEvent event)
     {
-        this.midiReceiver.onNoteOn = event;
+        this.midiReceiver.setOnNoteOn(event);
     }
     public void setOnNoteRelsesed(MidiEvent event)
     {
-        this.midiReceiver.OnNoteOff = event;
+        this.midiReceiver.setOnNoteOff(event);
     }
 
     public void setOnPedalPressed(MidiEvent event)
     {
-        this.midiReceiver.OnPedalOn = event;
+        this.midiReceiver.setOnPedalOn(event);
     }
     public void setOnPedalRelsesed(MidiEvent event)
     {
-        this.midiReceiver.OnPedalOff = event;
+        this.midiReceiver.setOnPedalOff(event);
     }
 
     public void setVolume(int volume) {

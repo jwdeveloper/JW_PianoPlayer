@@ -7,10 +7,15 @@ import jw.pianoplayer.utilites.AudioUtility;
 import jw.spigot_fluent_api.dependency_injection.InjectionType;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
 import jw.spigot_fluent_api.gui.button.button_observer.ButtonObserver;
+import jw.spigot_fluent_api.gui.implementation.accept_ui.AcceptUI;
 import jw.spigot_fluent_api.gui.implementation.picker_list_ui.FilePickerUI;
 import jw.spigot_fluent_api.gui.implementation.picker_list_ui.MaterialPickerUI;
+import jw.spigot_fluent_api.initialization.FluentPlugin;
+import jw.spigot_fluent_api.tasks.FluentTasks;
 import jw.spigot_fluent_api.utilites.binding.Observable;
+import jw.spigot_fluent_api.utilites.messages.MessageBuilder;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -36,76 +41,105 @@ public class PianoPanelController {
         this.pianoPanelUI = pianoPanelUI;
     }
 
-    public ButtonObserver<Location> locationButtonObserver() {
+    public ButtonObserver<Location> createPianoObserver(AcceptUI acceptUI) {
         return ButtonObserver.<Location>builder()
                 .observable(settingsService.getLocationBind())
                 .onClick(event ->
                 {
-                    if (settingsService.getIsPlayingBind().get()) {
-                        pianoPlayerService.destroyPiano();
-                        settingsService.getIsPianoPlacedBind().set(false);
-                        settingsService.getLocationBind().set(null);
-                        return;
+                    var isPianoPlaced = settingsService.getIsPianoPlacedBind().get();
+                    if (isPianoPlaced) {
+                        acceptUI.onUserChoice(value ->
+                        {
+                            if (value) {
+                                pianoPlayerService.destroyPiano();
+                                settingsService.getIsPianoPlacedBind().set(false);
+                                settingsService.getLocationBind().set(null);
+                            }
+                            pianoPanelUI.open(event.getPlayer());
+                        });
+                        acceptUI.open(event.getPlayer(), new MessageBuilder()
+                                .color(ChatColor.DARK_GRAY)
+                                .bold("Are you sure about that?")
+                                .toString());
+                    } else {
+                        pianoPanelUI.close();
+                        event.getPlayer().sendMessage(ChatColor.BOLD + "Destroy block to set location");
+                        pianoEventListener.addPlayerBlockListener(event.getPlayer(), (block) ->
+                        {
+                            settingsService.getLocationBind().set(block.getLocation());
+                            settingsService.getIsPianoPlacedBind().set(true);
+                            pianoPanelUI.open(event.getPlayer());
+                            FluentTasks.task(unused ->
+                            {
+                                pianoPlayerService.createPiano(block.getLocation());
+                            });
+                        });
                     }
-
-                    pianoPanelUI.close();
-                    event.getPlayer().sendMessage(ChatColor.BOLD + "Destroy block to set location");
-                    pianoEventListener.addPlayerBlockListener(event.getPlayer(), (block) ->
-                    {
-                        settingsService.getLocationBind().set(block.getLocation());
-                        pianoPlayerService.createPiano(block.getLocation());
-                        settingsService.getIsPianoPlacedBind().set(true);
-                        pianoPanelUI.open(event.getPlayer());
-                    });
                 })
                 .onValueChange(event ->
                 {
                     var button = event.getButton();
-                    if (settingsService.getIsPlayingBind().get()) {
-                        button.setTitle(ChatColor.BOLD + "Destroy piano");
+                    if (settingsService.getIsPianoPlacedBind().get()) {
+                        button.setTitle(new MessageBuilder()
+                                .color(ChatColor.BOLD)
+                                .color(ChatColor.RED)
+                                .inBrackets("Destroy piano")
+                                .toString());
                         button.setMaterial(Material.BARRIER);
                     } else {
-                        button.setTitle(ChatColor.BOLD + "Create piano");
+                        button.setTitle(new MessageBuilder()
+                                .color(ChatColor.BOLD)
+                                .color(ChatColor.GREEN)
+                                .inBrackets("Create piano")
+                                .toString());
                         button.setMaterial(Material.CRAFTING_TABLE);
                     }
                 }).build();
     }
 
-    public ButtonObserver<Boolean> playerButtonObserver() {
+    public ButtonObserver<Boolean> isPianoPlayingObserver() {
         return ButtonObserver.<Boolean>builder()
-                .observable(settingsService.getIsPianoPlacedBind())
+                .observable(settingsService.getIsPlayingBind())
                 .onClick(event ->
                 {
                     if (!settingsService.getIsPianoPlacedBind().get()) {
                         pianoPanelUI.setTitle(ChatColor.RED + "     ! At first place piano !");
+
                         return;
                     }
                     if (settingsService.getLastPlayedMidiBind().get().length() == 0) {
                         pianoPanelUI.setTitle(ChatColor.RED + "     ! Select Midi file !");
                         return;
                     }
-                    if (event.getValue())
+                    if (event.getValue()) {
                         pianoPlayerService.stop();
-                    else {
+                    } else {
                         var path = settingsService.midiFilesPath() + File.separator + settingsService.getLastPlayedMidiBind().get();
                         pianoPlayerService.play(path);
                     }
-
-                    settingsService.getIsPianoPlacedBind().set(!event.getValue());
+                    event.getObserver().setValue(!event.getValue());
                 })
                 .onValueChange(event ->
                 {
                     var button = event.getButton();
                     if (event.getValue()) {
-                        button.setTitle("Stop");
+                        button.setTitle(new MessageBuilder()
+                                .color(ChatColor.BOLD)
+                                .color(ChatColor.RED)
+                                .inBrackets("Stop")
+                                .toString());
                         button.setMaterial(Material.RED_WOOL);
                         pianoPanelUI.setBorderMaterial(Material.RED_STAINED_GLASS_PANE);
                     } else {
-                        button.setTitle("Play");
+                        button.setTitle(new MessageBuilder()
+                                .color(ChatColor.BOLD)
+                                .color(ChatColor.GREEN)
+                                .inBrackets("Play")
+                                .toString());
                         button.setMaterial(Material.GREEN_WOOL);
                         pianoPanelUI.setBorderMaterial(Material.LIME_STAINED_GLASS_PANE);
                     }
-                    pianoPanelUI.refresh();
+                    pianoPanelUI.refreshBorder();
                 }).build();
     }
 
@@ -114,25 +148,26 @@ public class PianoPanelController {
                 .observable(settingsService.getLocationBind())
                 .onClick(event ->
                 {
-                    if (event.getValue() == null)
+                    if (event.getValue() == null || event.getPlayer() == null)
                         return;
 
+                    var player = event.getPlayer();
+                    var loc = event.getValue().clone();
+                    loc.add(-10, 10, 44);
+                    loc.setPitch(player.getLocation().getPitch());
+                    loc.setYaw(player.getLocation().getYaw());
+                    event.getPlayer().teleport(loc);
+                })
+                .onValueChange(event ->
+                {
+                    if (event.getValue() == null)
+                        return;
                     var location = event.getValue();
                     event.getButton().setDescription(ChatColor.WHITE + "Location:",
                             "X: " + location.getBlockX(),
                             "Y: " + location.getBlockY(),
                             "Z: " + location.getBlockZ()
                     );
-                })
-                .onValueChange(event ->
-                {
-                    if (event.getValue() == null)
-                        return;
-                    event.getPlayer()
-                            .teleport(event
-                                    .getValue()
-                                    .clone()
-                                    .add(0, 2, 0));
                 }).build();
     }
 
@@ -149,6 +184,18 @@ public class PianoPanelController {
                     });
                     filePickerUI.open(event.getPlayer());
 
+                }).onValueChange(value ->
+                {
+                    if (value.getValue() == null)
+                        return;
+                    var desc = new MessageBuilder().color(ChatColor.BOLD)
+                            .color(ChatColor.DARK_GREEN)
+                            .inBrackets("Current")
+                            .space()
+                            .color(ChatColor.WHITE)
+                            .text(value.getValue()).toString();
+
+                    value.getButton().setDescription(desc);
                 }).build();
     }
 
@@ -161,11 +208,16 @@ public class PianoPanelController {
                     value += 10;
                     if (value > 100)
                         value = value % 100;
-                    event.getObserver().setValue(value);
-                    AudioUtility.setApplicationVolume(value / 100.0f);
+                    final int valueToSet = value;
+
+                    settingsService.getVolumeBind().set(valueToSet);
+                    FluentTasks.task(unused ->
+                    {
+                        AudioUtility.setApplicationVolume(valueToSet / 100.0f);
+                    });
                 }).onValueChange(event ->
                 {
-                    event.getButton().setDescription("Level: " + event.getValue().toString());
+                    event.getButton().setDescription(new MessageBuilder().field("Level", event.getValue().toString() + "%"));
                 }).build();
     }
 
@@ -178,46 +230,42 @@ public class PianoPanelController {
                 }).onValueChange(event ->
                 {
                     if (event.getValue()) {
-                        event.getButton().setDescription("Disable light");
+                        event.getButton().setDescription("Disable");
+                        event.getButton().setHighlighted(true);
                     } else {
-                        event.getButton().setDescription("Enable light");
+                        event.getButton().setDescription("Enable");
+                        event.getButton().setHighlighted(false);
                     }
                 })
                 .build();
     }
 
-    public ButtonObserver<Material> keyWhitePressObserver(MaterialPickerUI materialPickerUI)
-    {
+    public ButtonObserver<Material> keyWhitePressObserver(MaterialPickerUI materialPickerUI) {
         return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyWhitePressBind());
     }
 
-    public ButtonObserver<Material> keyWhiteReleaseObserver(MaterialPickerUI materialPickerUI)
-    {
+    public ButtonObserver<Material> keyWhiteReleaseObserver(MaterialPickerUI materialPickerUI) {
         return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyWhiteReleaseBind());
     }
 
-    public ButtonObserver<Material> keyDarkPressObserver(MaterialPickerUI materialPickerUI)
-    {
+    public ButtonObserver<Material> keyDarkPressObserver(MaterialPickerUI materialPickerUI) {
         return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyDarkPressBind());
     }
 
-    public ButtonObserver<Material> keyDarkReleaseBindObserver(MaterialPickerUI materialPickerUI)
-    {
+    public ButtonObserver<Material> keyDarkReleaseBindObserver(MaterialPickerUI materialPickerUI) {
         return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyDarkReleaseBind());
     }
 
-    public ButtonObserver<Boolean> isPianoCreatedObserver()
-    {
+    public ButtonObserver<Boolean> isPianoCreatedObserver() {
         return ButtonObserver.<Boolean>builder()
                 .observable(settingsService.getIsPianoPlacedBind())
                 .onValueChange(event ->
                 {
-                  event.getButton().setActive(event.getValue());
+                    // event.getButton().setActive(!event.getValue());
                 }).build();
     }
 
-    private ButtonObserver<Material> keyMaterialButtonObserver(MaterialPickerUI materialPickerUI, Observable<Material> observable)
-    {
+    private ButtonObserver<Material> keyMaterialButtonObserver(MaterialPickerUI materialPickerUI, Observable<Material> observable) {
         return ButtonObserver.<Material>builder()
                 .observable(observable)
                 .onClick(event ->
@@ -227,8 +275,20 @@ public class PianoPanelController {
                         Material material = button.getDataContext();
                         event.getObserver().setValue(material);
                         pianoPanelUI.open(player);
+
+                        FluentTasks.task(unused ->
+                        {
+                            pianoPlayerService.refreshKeys();
+                        });
                     });
                     materialPickerUI.open(event.getPlayer());
+                }).onValueChange(event ->
+                {
+                    if (event.getValue() == null)
+                        return;
+
+                    event.getButton().setMaterial(event.getValue());
                 }).build();
+
     }
 }

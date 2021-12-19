@@ -11,37 +11,37 @@ import javax.sound.midi.*;
 @Getter
 @Setter
 public class MidiReceiver implements Receiver {
-    public MidiEvent onNoteOn = (a, b, c) -> {
+    private MidiEvent onNoteOn = (a, b, c) -> {
     };
-    public MidiEvent OnNoteOff = (a, b, c) -> {
+    private MidiEvent onNoteOff = (a, b, c) -> {
     };
-    public MidiEvent OnPedalOn = (a, b, c) -> {
+    private MidiEvent onPedalOn = (a, b, c) -> {
     };
-    public MidiEvent OnPedalOff = (a, b, c) -> {
+    private MidiEvent onPedalOff = (a, b, c) -> {
     };
-    public boolean isPressed;
+    private boolean pressed;
 
     @Override
     public void send(MidiMessage midiMessage, long l) {
         if (midiMessage instanceof ShortMessage sm) {
             switch (sm.getCommand()) {
                 case ShortMessage.NOTE_OFF:
-                    OnNoteOff.execute(sm.getData1(), sm.getData2(), sm.getChannel());
+                    onNoteOff.execute(sm.getData1(), sm.getData2(), sm.getChannel());
                     break;
                 case ShortMessage.NOTE_ON:
                     if (sm.getData2() == 0)
-                        OnNoteOff.execute(sm.getData1(), sm.getData2(), sm.getChannel());
+                        onNoteOff.execute(sm.getData1(), sm.getData2(), sm.getChannel());
                     else
                         onNoteOn.execute(sm.getData1(), sm.getData2(), sm.getChannel());
                     break;
                 case ShortMessage.CONTROL_CHANGE:
                 case ShortMessage.POLY_PRESSURE:
                     if (sm.getData2() == 0) {
-                        isPressed = false;
-                        OnPedalOff.execute(sm.getData1(), sm.getData2(), sm.getChannel());
-                    } else if (!isPressed && sm.getData2() != 0) {
-                        isPressed = true;
-                        OnPedalOn.execute(sm.getData1(), sm.getData2(), sm.getChannel());
+                        pressed = false;
+                        onPedalOff.execute(sm.getData1(), sm.getData2(), sm.getChannel());
+                    } else if (!pressed && sm.getData2() != 0) {
+                        pressed = true;
+                        onPedalOn.execute(sm.getData1(), sm.getData2(), sm.getChannel());
                     }
                     break;
             }

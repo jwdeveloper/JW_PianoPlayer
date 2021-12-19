@@ -8,9 +8,9 @@ import jw.spigot_fluent_api.dependency_injection.SpigotBean;
 import org.bukkit.entity.Player;
 
 @SpigotBean(lazyLoad = false)
-public class PianoCommand2 extends FluentCommand
+public class PianoCommand extends FluentCommand
 {
-    public PianoCommand2()
+    public PianoCommand()
     {
         super("piano");
     }
@@ -22,7 +22,7 @@ public class PianoCommand2 extends FluentCommand
 
     @Override
     protected void onPlayerInvoke(Player playerSender, String[] args) {
-        var gui = InjectionManager.getObjectPlayer(PianoPanelUI.class,playerSender.getUniqueId());
+        var gui = InjectionManager.getObjectPlayer(PianoPanelUI.class, playerSender.getUniqueId());
         gui.open(playerSender);
     }
 

@@ -54,7 +54,8 @@ public class PianoKey implements PianoEvent {
                 setLightLevel(15);
             }
             for (Block b : blocks) {
-                b.setType(isBlack ? settingsService.getKeyWhiteReleaseBind().get() : settingsService.getKeyWhitePressBind().get());
+                b.setType(isBlack ? settingsService.getKeyDarkPressBind().get() :  settingsService.getKeyWhitePressBind().get());
+
             }
         });
     }
@@ -65,14 +66,12 @@ public class PianoKey implements PianoEvent {
             setLightLevel(0);
             for (Block b : blocks)
             {
-                b.setType(isBlack ? settingsService.getKeyDarkPressBind().get() :  settingsService.getKeyDarkReleaseBind().get());
+                b.setType(isBlack ? settingsService.getKeyDarkReleaseBind().get() : settingsService.getKeyWhiteReleaseBind().get());
             }
         });
     }
 
     public void removeKey() {
-        FluentTasks.task(unused ->
-        {
             if (isBlack) {
                 location.clone().add(0, -1, 0).getBlock().setType(Material.AIR);
             }
@@ -80,13 +79,19 @@ public class PianoKey implements PianoEvent {
                 b.setType(Material.AIR);
             }
             blocks.clear();
-        });
     }
 
 
-    public void Reset() {
+    public void reset() {
         onPressUp(0, 0, 0);
         setLightLevel(0);
+
+        if (isBlack)
+        {
+            var material = settingsService.getKeyWhiteReleaseBind().get();
+            location.clone().add(0, -1, 0).getBlock().setType(material);
+        }
+
     }
     private void loadKey() {
         World world = location.getWorld();
@@ -102,7 +107,7 @@ public class PianoKey implements PianoEvent {
                     loc.add(0, 1, 0);
                 } else {
                     world.getBlockAt(loc)
-                            .setType(settingsService.getKeyDarkPressBind().get());
+                            .setType(settingsService.getKeyDarkReleaseBind().get());
                     blocks.add(world.getBlockAt(loc));
                 }
             } else {

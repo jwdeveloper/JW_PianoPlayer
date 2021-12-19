@@ -33,7 +33,7 @@ public class PianoPlayerService
                 pianoKeys.get(note - 21).onKeyPress(velocity != 0, note, velocity, channel);
             }
         });
-        midiPlayerService.setOnNotePressed((note, velocity, channel) ->
+        midiPlayerService.setOnNoteRelsesed((note, velocity, channel) ->
         {
             if (settingsService.getIsPianoPlacedBind().get())
             {
@@ -77,6 +77,14 @@ public class PianoPlayerService
         pianoKeys.clear();
     }
 
+    public void refreshKeys()
+    {
+        pianoKeys.forEach((a, b) ->
+        {
+            b.reset();
+        });
+    }
+
 
     public void play(String midiFilePath)
     {
@@ -97,7 +105,7 @@ public class PianoPlayerService
     {
         pianoKeys.forEach((a, b) ->
         {
-            b.Reset();
+            b.reset();
         });
         midiPlayerService.stop();
         this.settingsService.getIsPlayingBind().setAsync(false);

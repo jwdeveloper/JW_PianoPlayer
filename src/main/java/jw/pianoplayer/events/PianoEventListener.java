@@ -4,6 +4,7 @@ import jw.pianoplayer.services.PianoPlayerService;
 import jw.pianoplayer.services.SettingsService;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
 import jw.spigot_fluent_api.events.EventBase;
+import jw.spigot_fluent_api.initialization.FluentPlugin;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,7 +35,8 @@ public class PianoEventListener extends EventBase
     }
 
     @Override
-    public void onPluginStop(PluginDisableEvent event) {
+    public void onPluginStop(PluginDisableEvent event)
+    {
         pianoPlayerService.destroyPiano();
     }
 
