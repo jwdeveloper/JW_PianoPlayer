@@ -2,7 +2,7 @@ package jw.pianoplayer.commands;
 
 
 import jw.pianoplayer.gui.PianoPanelUI;
-import jw.spigot_fluent_api.commands.FluentCommand;
+import jw.spigot_fluent_api.fluent_commands.FluentCommand;
 import jw.spigot_fluent_api.dependency_injection.InjectionManager;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
 import org.bukkit.entity.Player;

@@ -35,6 +35,7 @@ public class PianoPanelUI extends ChestUI {
                 .bold(" MIDI player ")
                 .text(Emoticons.music)
                 .toString());
+        player.getLocation().getDirection();
     }
 
     @Override
