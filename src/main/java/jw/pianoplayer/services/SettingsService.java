@@ -21,7 +21,7 @@ public class SettingsService {
     private Observable<String> lastPlayedMidiBind;
     private Observable<Material> keyWhitePressBind;
     private Observable<Material> keyWhiteReleaseBind;
-    
+
     private Observable<Material> keyDarkPressBind;
 
     private Observable<Material> keyDarkReleaseBind;
@@ -46,6 +46,10 @@ public class SettingsService {
     }
 
     public String midiFilesPath() {
-        return FluentPlugin.getPath();
+        return FileUtility.combinePath(FluentPlugin.getPath(), "midi");
+    }
+
+    public int getStartNoteIndex() {
+        return 21;
     }
 }

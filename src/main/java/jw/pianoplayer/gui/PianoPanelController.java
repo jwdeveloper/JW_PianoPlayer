@@ -66,8 +66,8 @@ public class PianoPanelController {
                         event.getPlayer().sendMessage(ChatColor.BOLD + "Destroy block to set location");
                         pianoEventListener.addPlayerBlockListener(event.getPlayer(), (block) ->
                         {
-                            settingsService.getLocationBind().set(block.getLocation());
                             settingsService.getIsPianoPlacedBind().set(true);
+                            settingsService.getLocationBind().set(block.getLocation());
                             pianoPanelUI.open(event.getPlayer());
                             FluentTasks.task(unused ->
                             {
@@ -80,18 +80,10 @@ public class PianoPanelController {
                 {
                     var button = event.getButton();
                     if (settingsService.getIsPianoPlacedBind().get()) {
-                        button.setTitle(new MessageBuilder()
-                                .color(ChatColor.BOLD)
-                                .color(ChatColor.RED)
-                                .inBrackets("Destroy piano")
-                                .toString());
+                        button.setTitle(PianoMessages.destroyPianoMessage());
                         button.setMaterial(Material.BARRIER);
                     } else {
-                        button.setTitle(new MessageBuilder()
-                                .color(ChatColor.BOLD)
-                                .color(ChatColor.GREEN)
-                                .inBrackets("Create piano")
-                                .toString());
+                        button.setTitle(PianoMessages.createPianoMessage());
                         button.setMaterial(Material.CRAFTING_TABLE);
                     }
                 }).build();
@@ -103,39 +95,35 @@ public class PianoPanelController {
                 .onClick(event ->
                 {
                     if (!settingsService.getIsPianoPlacedBind().get()) {
-                        pianoPanelUI.setTitle(ChatColor.RED + "     ! At first place piano !");
-
+                        pianoPanelUI.setTitle(PianoMessages.placePianoError());
                         return;
                     }
                     if (settingsService.getLastPlayedMidiBind().get().length() == 0) {
-                        pianoPanelUI.setTitle(ChatColor.RED + "     ! Select Midi file !");
+
+                        pianoPanelUI.setTitle(PianoMessages.setMidiFileError());
                         return;
                     }
                     if (event.getValue()) {
                         pianoPlayerService.stop();
+                        event.getObserver().setValue(false);
                     } else {
-                        var path = settingsService.midiFilesPath() + File.separator + settingsService.getLastPlayedMidiBind().get();
-                        pianoPlayerService.play(path);
+                        var path = settingsService.midiFilesPath() + settingsService.getLastPlayedMidiBind().get();
+                        var startPlaying = pianoPlayerService.play(path);
+                        if(!startPlaying)
+                            pianoPanelUI.setTitle(PianoMessages.playMidiFileError());
+                        event.getObserver().setValue(startPlaying);
                     }
-                    event.getObserver().setValue(!event.getValue());
+
                 })
                 .onValueChange(event ->
                 {
                     var button = event.getButton();
                     if (event.getValue()) {
-                        button.setTitle(new MessageBuilder()
-                                .color(ChatColor.BOLD)
-                                .color(ChatColor.RED)
-                                .inBrackets("Stop")
-                                .toString());
+                        button.setTitle(PianoMessages.playingStateStop());
                         button.setMaterial(Material.RED_WOOL);
                         pianoPanelUI.setBorderMaterial(Material.RED_STAINED_GLASS_PANE);
                     } else {
-                        button.setTitle(new MessageBuilder()
-                                .color(ChatColor.BOLD)
-                                .color(ChatColor.GREEN)
-                                .inBrackets("Play")
-                                .toString());
+                        button.setTitle(PianoMessages.playingStatePlay());
                         button.setMaterial(Material.GREEN_WOOL);
                         pianoPanelUI.setBorderMaterial(Material.LIME_STAINED_GLASS_PANE);
                     }
@@ -157,18 +145,7 @@ public class PianoPanelController {
                     loc.setPitch(player.getLocation().getPitch());
                     loc.setYaw(player.getLocation().getYaw());
                     event.getPlayer().teleport(loc);
-                })
-                .onValueChange(event ->
-                {
-                    if (event.getValue() == null)
-                        return;
-                    var location = event.getValue();
-                    event.getButton().setDescription(ChatColor.WHITE + "Location:",
-                            "X: " + location.getBlockX(),
-                            "Y: " + location.getBlockY(),
-                            "Z: " + location.getBlockZ()
-                    );
-                }).build();
+                }) .build();
     }
 
     public ButtonObserver<String> selectMidiFileButtonObserver(FilePickerUI filePickerUI) {
@@ -176,26 +153,31 @@ public class PianoPanelController {
                 .observable(settingsService.getLastPlayedMidiBind())
                 .onClick(event ->
                 {
+                    filePickerUI.setPath(settingsService.midiFilesPath());
                     filePickerUI.setOnItemPicked((player, button) ->
                     {
                         String path = button.getDataContext();
                         event.getObserver().setValue(path);
                         pianoPanelUI.open(player);
+
                     });
                     filePickerUI.open(event.getPlayer());
 
                 }).onValueChange(value ->
                 {
-                    if (value.getValue() == null)
-                        return;
-                    var desc = new MessageBuilder().color(ChatColor.BOLD)
-                            .color(ChatColor.DARK_GREEN)
-                            .inBrackets("Current")
-                            .space()
+                    var message = new MessageBuilder().color(ChatColor.BOLD);
+                    if (value.getValue() == null || value.getValue() == "") {
+                        message.color(ChatColor.RED)
+                                .inBrackets("File not selected");
+                    } else {
+                        message.color(ChatColor.DARK_GREEN)
+                                .inBrackets("Current file");
+                    }
+                    message.space()
                             .color(ChatColor.WHITE)
                             .text(value.getValue()).toString();
 
-                    value.getButton().setDescription(desc);
+                    value.getButton().setDescription(message);
                 }).build();
     }
 
@@ -217,7 +199,7 @@ public class PianoPanelController {
                     });
                 }).onValueChange(event ->
                 {
-                    event.getButton().setDescription(new MessageBuilder().field("Level", event.getValue().toString() + "%"));
+                    event.getButton().setDescription(PianoMessages.audioLevel(event.getValue()));
                 }).build();
     }
 
@@ -261,7 +243,7 @@ public class PianoPanelController {
                 .observable(settingsService.getIsPianoPlacedBind())
                 .onValueChange(event ->
                 {
-                    // event.getButton().setActive(!event.getValue());
+                 //   event.getButton().setActive(event.getValue());
                 }).build();
     }
 

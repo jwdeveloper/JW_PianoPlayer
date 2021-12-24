@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.sound.midi.*;
+import java.util.function.Consumer;
 
 @SpigotBean
 @Getter
@@ -19,6 +20,9 @@ public class MidiReceiver implements Receiver {
     };
     private MidiEvent onPedalOff = (a, b, c) -> {
     };
+
+    private Consumer<?> onStop = (a)->{};
+
     private boolean pressed;
 
     @Override
@@ -67,7 +71,7 @@ public class MidiReceiver implements Receiver {
 
     @Override
     public void close() {
-
+        onStop.accept(null);
     }
 
 }

@@ -47,10 +47,9 @@ public class PianoPanelUI extends ChestUI {
         materialPicker.applyFilters();
         materialPicker.setParent(this);
 
-        var filePicker = new FilePickerUI("/plugins/JW_PianoPlayer", 6);
+        var filePicker = new FilePickerUI("Plugins/JW_PianoPlayer/midi", 6);
         filePicker.setExtensions("mid","midi");
         filePicker.applyFilters();
-        filePicker.setPath(FluentPlugin.getPath());
         filePicker.setParent(this);
 
         var acceptUI = new AcceptUI("Are you sure about that?",3);
