@@ -1,6 +1,7 @@
 package jw.pianoplayer.services;
 import jw.pianoplayer.piano.PianoKey;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.initialization.FluentPlugin;
 import org.bukkit.Location;
 import java.util.HashMap;
 
@@ -30,16 +31,20 @@ public class PianoPlayerService
         {
             if (settingsService.getIsPianoPlacedBind().get())
             {
-                pianoKeys.get(note - 21).onKeyPress(velocity != 0, note, velocity, channel);
+                pianoKeys.get(note - settingsService.getStartNoteIndex()).onKeyPress(velocity != 0, note, velocity, channel);
             }
         });
         midiPlayerService.setOnNoteRelsesed((note, velocity, channel) ->
         {
             if (settingsService.getIsPianoPlacedBind().get())
             {
-                pianoKeys.get(note - 21).onKeyPress(false, note, velocity, channel);
-
+                pianoKeys.get(note - settingsService.getStartNoteIndex()).onKeyPress(false, note, velocity, channel);
             }
+        });
+
+        midiPlayerService.onStopPlaying(o ->
+        {
+            this.settingsService.getIsPlayingBind().setAsync(false);
         });
     }
 
@@ -86,18 +91,26 @@ public class PianoPlayerService
     }
 
 
-    public void play(String midiFilePath)
+    public boolean play(String midiFilePath)
     {
-        if (!settingsService.getIsPianoPlacedBind().get())
-            return;
+        try {
+            if (!settingsService.getIsPianoPlacedBind().get())
+                return false;
 
-        if (midiPlayerService.isPlaying())
-        {
-            stop();
+            if (midiPlayerService.isPlaying())
+            {
+                stop();
+            }
+            midiPlayerService.loadFile(midiFilePath);
+            midiPlayerService.start();
+            settingsService.getIsPlayingBind().setAsync(true);
+            return true;
         }
-        midiPlayerService.loadFile(midiFilePath);
-        midiPlayerService.start();
-        settingsService.getIsPlayingBind().setAsync(true);
+        catch (Exception e)
+        {
+            FluentPlugin.logError("File from path "+midiFilePath+" can not by Piano player :<");
+            return false;
+        }
     }
 
 

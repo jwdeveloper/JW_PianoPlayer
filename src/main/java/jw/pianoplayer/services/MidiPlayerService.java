@@ -41,6 +41,10 @@ public class MidiPlayerService {
         if (sequencer == null) return false;
         else return sequencer.isRunning();
     }
+    public void onStopPlaying(Consumer<?> event)
+    {
+        this.midiReceiver.setOnStop(event);
+    }
 
     public void setOnNotePressed(MidiEvent event)
     {
@@ -123,7 +127,9 @@ public class MidiPlayerService {
             loaded = true;
         } catch (InvalidMidiDataException | IOException | MidiUnavailableException exception)
         {
+            FluentPlugin.logError("Error while loading midi file");
             FluentPlugin.logError(exception.getMessage());
+            FluentPlugin.logError(exception.getCause().toString());
         }
     }
 
