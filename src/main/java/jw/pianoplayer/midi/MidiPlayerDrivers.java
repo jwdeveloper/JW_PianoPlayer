@@ -1,9 +1,9 @@
-package jw.pianoplayer.services;
+package jw.pianoplayer.midi;
 
 import jw.pianoplayer.events.MidiEvent;
 import jw.pianoplayer.midi.MidiReceiver;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
-import jw.spigot_fluent_api.initialization.FluentPlugin;
+import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 @SpigotBean
 @Getter
 @Setter
-public class MidiPlayerService {
+public class MidiPlayerDrivers {
 
     private final MidiReceiver midiReceiver;
 
@@ -24,14 +24,13 @@ public class MidiPlayerService {
     private Sequencer sequencer;
     private Synthesizer synthesizer;
     private boolean loaded = false;
-    private float currentTime = 0;
     private Track[] tracks;
     private String filePath;
 
     private Consumer<?> OnStart;
     private Consumer<?> OnStop;
 
-    public MidiPlayerService(MidiReceiver midiReceiver)
+    public MidiPlayerDrivers(MidiReceiver midiReceiver)
     {
         this.midiReceiver = midiReceiver;
     }
@@ -44,6 +43,17 @@ public class MidiPlayerService {
     public void onStopPlaying(Consumer<?> event)
     {
         this.midiReceiver.setOnStop(event);
+    }
+
+    public float getCurrentMS()
+    {
+       return sequencer.getMicrosecondPosition();
+    }
+
+
+    public float getMS()
+    {
+        return  sequencer.getMicrosecondLength();
     }
 
     public void setOnNotePressed(MidiEvent event)
@@ -64,28 +74,11 @@ public class MidiPlayerService {
         this.midiReceiver.setOnPedalOff(event);
     }
 
-    public void setVolume(int volume) {
-        try {
-            var channels = synthesizer.getChannels();
-            for (MidiChannel channel : channels) {
-                if (channel == null)
-                 continue;
-
-                channel.controlChange(7, (int) (volume * 127));
-                channel.controlChange(39, (int) (volume * 127));
-                channel.setMute(true);
-            }
-            sequencer.setSequence(sequence);
-        } catch (InvalidMidiDataException exception) {
-            FluentPlugin.logError(exception.getMessage());
-        }
-    }
 
     public void start() {
 
         if(isPlaying())
             return;
-
         getSequencer().start();
         if(getOnStart() != null)
         getOnStart().accept(null);
@@ -118,10 +111,8 @@ public class MidiPlayerService {
             sequence = MidiSystem.getSequence(file);
             sequencer = MidiSystem.getSequencer(true);
             synthesizer = MidiSystem.getSynthesizer();
-
             sequencer.open();
             synthesizer.open();
-
             sequencer.getTransmitter().setReceiver(this.midiReceiver);
             sequencer.setSequence(sequence);
             loaded = true;
@@ -130,6 +121,22 @@ public class MidiPlayerService {
             FluentPlugin.logError("Error while loading midi file");
             FluentPlugin.logError(exception.getMessage());
             FluentPlugin.logError(exception.getCause().toString());
+        }
+    }
+    public void setVolume(int volume) {
+        try {
+            var channels = synthesizer.getChannels();
+            for (MidiChannel channel : channels) {
+                if (channel == null)
+                    continue;
+
+                channel.controlChange(7, (int) (volume * 127));
+                channel.controlChange(39, (int) (volume * 127));
+                channel.setMute(true);
+            }
+            sequencer.setSequence(sequence);
+        } catch (InvalidMidiDataException exception) {
+            FluentPlugin.logError(exception.getMessage());
         }
     }
 

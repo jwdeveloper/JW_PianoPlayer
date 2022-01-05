@@ -12,6 +12,7 @@ import org.bukkit.Material;
 @Setter
 public class Settings implements Saveable
 {
+    public Boolean isInfoBar = false;
     public Boolean isPlaying = false;
     public Boolean isLightEnable = true;
     public Boolean isPianoPlaced = false;

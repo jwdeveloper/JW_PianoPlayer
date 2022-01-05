@@ -2,7 +2,7 @@ package jw.pianoplayer.services;
 
 import jw.pianoplayer.data.Settings;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
-import jw.spigot_fluent_api.initialization.FluentPlugin;
+import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
 import jw.spigot_fluent_api.utilites.binding.Observable;
 import jw.spigot_fluent_api.utilites.files.FileUtility;
 import lombok.Getter;
@@ -15,6 +15,7 @@ import org.bukkit.Material;
 @Setter
 public class SettingsService {
     private Observable<Integer> volumeBind;
+    private Observable<Boolean> isInfoBarBind;
     private Observable<Boolean> isPianoPlacedBind;
     private Observable<Boolean> isPlayingBind;
     private Observable<Boolean> isLightEnableBind;
@@ -33,6 +34,7 @@ public class SettingsService {
     public SettingsService(Settings settings) {
         this.settings = settings;
         volumeBind = new Observable<>(settings, "volume");
+        isInfoBarBind = new Observable<>(settings, "isInfoBar");
         isPianoPlacedBind = new Observable<>(settings, "isPianoPlaced");
         isPlayingBind = new Observable<>(settings, "isPlaying");
         isLightEnableBind = new Observable<>(settings, "isLightEnable");

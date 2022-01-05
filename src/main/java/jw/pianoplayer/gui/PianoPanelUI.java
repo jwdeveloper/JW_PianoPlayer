@@ -2,12 +2,11 @@ package jw.pianoplayer.gui;
 
 import jw.spigot_fluent_api.dependency_injection.InjectionType;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
-import jw.spigot_fluent_api.gui.button.button_observer.ButtonObserverUI;
-import jw.spigot_fluent_api.gui.implementation.accept_ui.AcceptUI;
-import jw.spigot_fluent_api.gui.implementation.chest_ui.ChestUI;
-import jw.spigot_fluent_api.gui.implementation.picker_list_ui.FilePickerUI;
-import jw.spigot_fluent_api.gui.implementation.picker_list_ui.MaterialPickerUI;
-import jw.spigot_fluent_api.initialization.FluentPlugin;
+import jw.spigot_fluent_api.fluent_gui.button.button_observer.ButtonObserverUI;
+import jw.spigot_fluent_api.fluent_gui.implementation.accept_ui.AcceptUI;
+import jw.spigot_fluent_api.fluent_gui.implementation.chest_ui.ChestUI;
+import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.FilePickerUI;
+import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.MaterialPickerUI;
 import jw.spigot_fluent_api.utilites.messages.Emoticons;
 import jw.spigot_fluent_api.utilites.messages.MessageBuilder;
 import org.bukkit.ChatColor;
@@ -96,9 +95,26 @@ public class PianoPanelUI extends ChestUI {
                 .addObserver(pianoPanelController.isPianoPlayingObserver())
                 .buildAndAdd(this);
 
+
+        var lightButton = ButtonObserverUI.builder()
+                .setTitle(titleFormatter("Lighting"))
+                .setLocation(3, 2)
+                .setMaterial(Material.LIGHT)
+                .addObserver(pianoPanelController.isPianoCreatedObserver())
+                .addObserver(pianoPanelController.lightButtonObserver())
+                .buildAndAdd(this);
+
+        var infoBarButton = ButtonObserverUI.builder()
+                .setTitle(titleFormatter("Info bar"))
+                .setLocation(3, 4)
+                .setMaterial(Material.PAPER)
+                .addObserver(pianoPanelController.isPianoCreatedObserver())
+                .addObserver(pianoPanelController.infoBarButtonObserver())
+                .buildAndAdd(this);
+
         var teleportButton = ButtonObserverUI.builder()
                 .setTitle(titleFormatter("Teleport to piano"))
-                .setLocation(3, 4)
+                .setLocation(3, 6)
                 .setMaterial(Material.ENDER_PEARL)
                 .addObserver(pianoPanelController.isPianoCreatedObserver())
                 .addObserver(pianoPanelController.teleportButtonObserver())
@@ -120,13 +136,7 @@ public class PianoPanelUI extends ChestUI {
                 .addObserver(pianoPanelController.volumeButtonObserver())
                 .buildAndAdd(this);
 
-        var lightButton = ButtonObserverUI.builder()
-                .setTitle(titleFormatter("Lighting"))
-                .setLocation(3, 2)
-                .setMaterial(Material.LIGHT)
-                .addObserver(pianoPanelController.isPianoCreatedObserver())
-                .addObserver(pianoPanelController.lightButtonObserver())
-                .buildAndAdd(this);
+
     }
 
     private String titleFormatter(String value)

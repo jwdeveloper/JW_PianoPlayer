@@ -1,51 +1,103 @@
 package jw.pianoplayer.services;
+
+import jw.pianoplayer.midi.MidiPlayerDrivers;
 import jw.pianoplayer.piano.PianoKey;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
-import jw.spigot_fluent_api.initialization.FluentPlugin;
+import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarFlag;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
+
+import java.io.File;
 import java.util.HashMap;
 
 @SpigotBean(lazyLoad = false)
-public class PianoPlayerService
-{
+public class PianoPlayerService {
+    private final int PIANO_KEYS = 88;
     private final SettingsService settingsService;
-    private final MidiPlayerService midiPlayerService;
+    private final MidiPlayerDrivers midiPlayerDrivers;
     private HashMap<Integer, PianoKey> pianoKeys;
+    private BossBar bossBar;
 
-    public PianoPlayerService(SettingsService settings, MidiPlayerService midiPlayerService)
-    {
+    public PianoPlayerService(SettingsService settings, MidiPlayerDrivers midiPlayerDrivers) {
 
-        this.midiPlayerService = midiPlayerService;
+        this.midiPlayerDrivers = midiPlayerDrivers;
         this.settingsService = settings;
         this.pianoKeys = new HashMap<>();
 
-        midiPlayerService.setOnStart((o)->
+
+        settings.getIsInfoBarBind().onChange(value ->
         {
-            this.settingsService.getIsPlayingBind().setAsync(true);
-        });
-        midiPlayerService.setOnStop((o)->
-        {
-            this.settingsService.getIsPlayingBind().setAsync(false);
-        });
-        midiPlayerService.setOnNotePressed((note, velocity, channel) ->
-        {
-            if (settingsService.getIsPianoPlacedBind().get())
-            {
-                pianoKeys.get(note - settingsService.getStartNoteIndex()).onKeyPress(velocity != 0, note, velocity, channel);
-            }
-        });
-        midiPlayerService.setOnNoteRelsesed((note, velocity, channel) ->
-        {
-            if (settingsService.getIsPianoPlacedBind().get())
-            {
-                pianoKeys.get(note - settingsService.getStartNoteIndex()).onKeyPress(false, note, velocity, channel);
-            }
+            if (value)
+                createInfoBar();
+            else
+                removeInfoBar();
         });
 
-        midiPlayerService.onStopPlaying(o ->
+        midiPlayerDrivers.setOnStart((o) ->
         {
+            this.settingsService.getIsPlayingBind().setAsync(true);
+            if (settings.getIsInfoBarBind().get()) {
+                createInfoBar();
+            }
+        });
+        midiPlayerDrivers.setOnStop((o) ->
+        {
+            removeInfoBar();
             this.settingsService.getIsPlayingBind().setAsync(false);
         });
+        midiPlayerDrivers.onStopPlaying(o ->
+        {
+            removeInfoBar();
+            this.settingsService.getIsPlayingBind().setAsync(false);
+        });
+        midiPlayerDrivers.setOnNotePressed((note, velocity, channel) ->
+        {
+            if (!settingsService.getIsPianoPlacedBind().get())
+                return;
+
+            updateInfoBar();
+            pianoKeys.get(note - settingsService.getStartNoteIndex()).onKeyPress(velocity != 0, note, velocity, channel);
+        });
+        midiPlayerDrivers.setOnNoteRelsesed((note, velocity, channel) ->
+        {
+            if (!settingsService.getIsPianoPlacedBind().get())
+                return;
+                updateInfoBar();
+                pianoKeys.get(note - settingsService.getStartNoteIndex()).onKeyPress(false, note, velocity, channel);
+        });
+    }
+
+    private void createInfoBar() {
+        bossBar = Bukkit.createBossBar("MIDI File", BarColor.GREEN, BarStyle.SOLID);
+        var title = midiPlayerDrivers.getFilePath();
+        title = title.substring(title.lastIndexOf(File.separator) + 1);
+        bossBar.setTitle(ChatColor.GREEN + title);
+        for (var player : Bukkit.getOnlinePlayers()) {
+            bossBar.addPlayer(player);
+        }
+        bossBar.setProgress(0);
+    }
+
+    private void updateInfoBar() {
+        if (bossBar == null)
+            return;
+
+        bossBar.setProgress(midiPlayerDrivers.getCurrentMS() / midiPlayerDrivers.getMS());
+
+        if (bossBar.getProgress() == 1)
+            removeInfoBar();
+    }
+
+    private void removeInfoBar() {
+        if (bossBar != null)
+            bossBar.removeAll();
+
+        bossBar = null;
     }
 
     public void createPiano(Location location) {
@@ -55,8 +107,8 @@ public class PianoPlayerService
         destroyPiano();
         var key = 1;
         var isBlack = false;
-        for (int i = 1; i <= 88; i++) {
-            if (i > 3 && i < 88) {
+        for (int i = 1; i <= PIANO_KEYS; i++) {
+            if (i > 3 && i < PIANO_KEYS) {
                 key = (i - 4) % 12;
             }
             if (i <= 3) {
@@ -72,8 +124,7 @@ public class PianoPlayerService
         settingsService.getLocationBind().set(location);
     }
 
-    public void destroyPiano()
-    {
+    public void destroyPiano() {
         stop();
         pianoKeys.forEach((a, b) ->
         {
@@ -82,8 +133,7 @@ public class PianoPlayerService
         pianoKeys.clear();
     }
 
-    public void refreshKeys()
-    {
+    public void refreshKeys() {
         pianoKeys.forEach((a, b) ->
         {
             b.reset();
@@ -91,36 +141,31 @@ public class PianoPlayerService
     }
 
 
-    public boolean play(String midiFilePath)
-    {
+    public boolean play(String midiFilePath) {
         try {
             if (!settingsService.getIsPianoPlacedBind().get())
                 return false;
 
-            if (midiPlayerService.isPlaying())
-            {
+            if (midiPlayerDrivers.isPlaying()) {
                 stop();
             }
-            midiPlayerService.loadFile(midiFilePath);
-            midiPlayerService.start();
+            midiPlayerDrivers.loadFile(midiFilePath);
+            midiPlayerDrivers.start();
             settingsService.getIsPlayingBind().setAsync(true);
             return true;
-        }
-        catch (Exception e)
-        {
-            FluentPlugin.logError("File from path "+midiFilePath+" can not by Piano player :<");
+        } catch (Exception e) {
+            FluentPlugin.logError("File from path " + midiFilePath + " can not by Piano player :<");
             return false;
         }
     }
 
 
-    public void stop()
-    {
+    public void stop() {
         pianoKeys.forEach((a, b) ->
         {
             b.reset();
         });
-        midiPlayerService.stop();
+        midiPlayerDrivers.stop();
         this.settingsService.getIsPlayingBind().setAsync(false);
     }
 }

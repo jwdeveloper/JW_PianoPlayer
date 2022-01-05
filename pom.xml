@@ -6,7 +6,7 @@
 
     <groupId>pianoplayer</groupId>
     <artifactId>jw</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>JW_PianoPlayer</name>
@@ -14,6 +14,7 @@
     <properties>
         <java.version>16</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <minecraft.version>1.17</minecraft.version>
     </properties>
 
     <build>
@@ -39,6 +40,7 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <outputFile>${project.basedir}\builds\${minecraft.version}\${project.version}\${project.name}.${project.packaging}</outputFile>
                         </configuration>
                     </execution>
                 </executions>
@@ -71,12 +73,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>jw</groupId>
-            <artifactId>fluent_spigot_test</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.8.2</version>
@@ -87,6 +83,12 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>4.0.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jw</groupId>
+            <artifactId>SpigotFluentApi</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

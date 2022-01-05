@@ -2,8 +2,8 @@ package jw.pianoplayer.piano;
 
 import jw.pianoplayer.events.PianoEvent;
 import jw.pianoplayer.services.SettingsService;
-import jw.spigot_fluent_api.initialization.FluentPlugin;
-import jw.spigot_fluent_api.tasks.FluentTasks;
+import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
+import jw.spigot_fluent_api.fluent_tasks.FluentTasks;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;

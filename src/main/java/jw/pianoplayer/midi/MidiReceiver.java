@@ -2,6 +2,7 @@ package jw.pianoplayer.midi;
 
 import jw.pianoplayer.events.MidiEvent;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +24,8 @@ public class MidiReceiver implements Receiver {
 
     private Consumer<?> onStop = (a)->{};
 
+    private float currentTime;
+    private float time;
     private boolean pressed;
 
     @Override
@@ -48,24 +51,24 @@ public class MidiReceiver implements Receiver {
                         onPedalOn.execute(sm.getData1(), sm.getData2(), sm.getChannel());
                     }
                     break;
+                case ShortMessage.STOP:
+                  //  FluentPlugin.logSuccess("MIDI"+ midiMessage.getMessage()+" status "+midiMessage.getStatus()+" "+l);
+                    if(onStop!= null)
+                        onStop.accept(null);
+                    break;
             }
-
-            //  System.out.println("ShortMessage: "+sm.getStatus()+" "+sm.getCommand()+" "+sm.getChannel()+" "+sm.getData1()+" "+sm.getData2()+" "+l);
             return;
         }
+
         if (midiMessage instanceof MetaMessage) {
             MetaMessage sm = (MetaMessage) midiMessage;
-
-            //System.out.println("MetaMessage: "+sm.getStatus());
+         //   System.out.println("MetaMessage: "+sm.getStatus());
             return;
         }
         if (midiMessage instanceof SysexMessage) {
             SysexMessage sm = (SysexMessage) midiMessage;
-
-            // System.out.println("Systex: "+sm.getStatus());
+          //  System.out.println("Systex: "+sm.getStatus());
         }
-
-
         //   System.out.println("Transmiter works "+midiMessage.getStatus()+" " + midiMessage.getMessage()[0]+" " +midiMessage.getMessage()[1]+l);
     }
 

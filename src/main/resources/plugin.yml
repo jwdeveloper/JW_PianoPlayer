@@ -1,4 +1,4 @@
-name: JW_PianoPlayer
+name: ${project.name}
 version: ${project.version}
 main: jw.pianoplayer.Main
-api-version: 1.17
+api-version: ${minecraft.version}

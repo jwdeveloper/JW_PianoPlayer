@@ -6,20 +6,16 @@ import jw.pianoplayer.services.SettingsService;
 import jw.pianoplayer.utilites.AudioUtility;
 import jw.spigot_fluent_api.dependency_injection.InjectionType;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
-import jw.spigot_fluent_api.gui.button.button_observer.ButtonObserver;
-import jw.spigot_fluent_api.gui.implementation.accept_ui.AcceptUI;
-import jw.spigot_fluent_api.gui.implementation.picker_list_ui.FilePickerUI;
-import jw.spigot_fluent_api.gui.implementation.picker_list_ui.MaterialPickerUI;
-import jw.spigot_fluent_api.initialization.FluentPlugin;
-import jw.spigot_fluent_api.tasks.FluentTasks;
+import jw.spigot_fluent_api.fluent_gui.button.button_observer.ButtonObserver;
+import jw.spigot_fluent_api.fluent_gui.implementation.accept_ui.AcceptUI;
+import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.FilePickerUI;
+import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.MaterialPickerUI;
+import jw.spigot_fluent_api.fluent_tasks.FluentTasks;
 import jw.spigot_fluent_api.utilites.binding.Observable;
 import jw.spigot_fluent_api.utilites.messages.MessageBuilder;
 import org.bukkit.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
-
-import java.io.File;
 
 
 @SpigotBean(injectionType = InjectionType.TRANSIENT)
@@ -212,15 +208,36 @@ public class PianoPanelController {
                 }).onValueChange(event ->
                 {
                     if (event.getValue()) {
-                        event.getButton().setDescription("Disable");
+                        event.getButton().setDescription("Enable");
                         event.getButton().setHighlighted(true);
                     } else {
-                        event.getButton().setDescription("Enable");
+                        event.getButton().setDescription("Disable");
                         event.getButton().setHighlighted(false);
                     }
                 })
                 .build();
     }
+
+    public ButtonObserver<Boolean> infoBarButtonObserver() {
+        return ButtonObserver.<Boolean>builder()
+                .observable(settingsService.getIsInfoBarBind())
+                .onClick(event ->
+                {
+                    event.getObserver().setValue(!event.getValue());
+                }).onValueChange(event ->
+                {
+                    if (event.getValue()) {
+                        event.getButton().setDescription("Enable");
+                        event.getButton().setHighlighted(true);
+                    } else
+                    {
+                        event.getButton().setDescription("Disable");
+                        event.getButton().setHighlighted(false);
+                    }
+                })
+                .build();
+    }
+
 
     public ButtonObserver<Material> keyWhitePressObserver(MaterialPickerUI materialPickerUI) {
         return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyWhitePressBind());
