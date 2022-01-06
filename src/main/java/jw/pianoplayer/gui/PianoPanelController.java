@@ -1,6 +1,6 @@
 package jw.pianoplayer.gui;
 
-import jw.pianoplayer.events.PianoEventListener;
+import jw.pianoplayer.listeners.PianoListener;
 import jw.pianoplayer.services.PianoPlayerService;
 import jw.pianoplayer.services.SettingsService;
 import jw.pianoplayer.utilites.AudioUtility;
@@ -12,6 +12,7 @@ import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.FilePickerU
 import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.MaterialPickerUI;
 import jw.spigot_fluent_api.fluent_tasks.FluentTasks;
 import jw.spigot_fluent_api.utilites.binding.Observable;
+import jw.spigot_fluent_api.utilites.binding.implementation.BooleanButtonObserver;
 import jw.spigot_fluent_api.utilites.messages.MessageBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,12 +22,12 @@ import org.bukkit.Material;
 @SpigotBean(injectionType = InjectionType.TRANSIENT)
 public class PianoPanelController {
     private final PianoPlayerService pianoPlayerService;
-    private final PianoEventListener pianoEventListener;
+    private final PianoListener pianoEventListener;
     private final SettingsService settingsService;
     private PianoPanelUI pianoPanelUI;
 
     public PianoPanelController(PianoPlayerService pianoPlayerService,
-                                PianoEventListener pianoEventListener,
+                                PianoListener pianoEventListener,
                                 SettingsService settingsService) {
         this.pianoPlayerService = pianoPlayerService;
         this.pianoEventListener = pianoEventListener;
@@ -39,7 +40,7 @@ public class PianoPanelController {
 
     public ButtonObserver<Location> createPianoObserver(AcceptUI acceptUI) {
         return ButtonObserver.<Location>builder()
-                .observable(settingsService.getLocationBind())
+                .withObserver(settingsService.getLocationBind())
                 .onClick(event ->
                 {
                     var isPianoPlaced = settingsService.getIsPianoPlacedBind().get();
@@ -87,7 +88,7 @@ public class PianoPanelController {
 
     public ButtonObserver<Boolean> isPianoPlayingObserver() {
         return ButtonObserver.<Boolean>builder()
-                .observable(settingsService.getIsPlayingBind())
+                .withObserver(settingsService.getIsPlayingBind())
                 .onClick(event ->
                 {
                     if (!settingsService.getIsPianoPlacedBind().get()) {
@@ -127,9 +128,9 @@ public class PianoPanelController {
                 }).build();
     }
 
-    public ButtonObserver<Location> teleportButtonObserver() {
+    public ButtonObserver<Location> teleportObserver() {
         return ButtonObserver.<Location>builder()
-                .observable(settingsService.getLocationBind())
+                .withObserver(settingsService.getLocationBind())
                 .onClick(event ->
                 {
                     if (event.getValue() == null || event.getPlayer() == null)
@@ -144,9 +145,9 @@ public class PianoPanelController {
                 }) .build();
     }
 
-    public ButtonObserver<String> selectMidiFileButtonObserver(FilePickerUI filePickerUI) {
+    public ButtonObserver<String> selectMidiFileObserver(FilePickerUI filePickerUI) {
         return ButtonObserver.<String>builder()
-                .observable(settingsService.getLastPlayedMidiBind())
+                .withObserver(settingsService.getLastPlayedMidiBind())
                 .onClick(event ->
                 {
                     filePickerUI.setPath(settingsService.midiFilesPath());
@@ -177,9 +178,9 @@ public class PianoPanelController {
                 }).build();
     }
 
-    public ButtonObserver<Integer> volumeButtonObserver() {
+    public ButtonObserver<Integer> volumeObserver() {
         return ButtonObserver.<Integer>builder()
-                .observable(settingsService.getVolumeBind())
+                .withObserver(settingsService.getVolumeBind())
                 .onClick(event ->
                 {
                     var value = event.getObserver().getValue();
@@ -199,74 +200,42 @@ public class PianoPanelController {
                 }).build();
     }
 
-    public ButtonObserver<Boolean> lightButtonObserver() {
-        return ButtonObserver.<Boolean>builder()
-                .observable(settingsService.getIsLightEnableBind())
-                .onClick(event ->
-                {
-                    event.getObserver().setValue(!event.getValue());
-                }).onValueChange(event ->
-                {
-                    if (event.getValue()) {
-                        event.getButton().setDescription("Enable");
-                        event.getButton().setHighlighted(true);
-                    } else {
-                        event.getButton().setDescription("Disable");
-                        event.getButton().setHighlighted(false);
-                    }
-                })
-                .build();
+    public ButtonObserver<Boolean> lightObserver() {
+        return BooleanButtonObserver.create(settingsService.getIsLightEnableBind());
     }
 
-    public ButtonObserver<Boolean> infoBarButtonObserver() {
-        return ButtonObserver.<Boolean>builder()
-                .observable(settingsService.getIsInfoBarBind())
-                .onClick(event ->
-                {
-                    event.getObserver().setValue(!event.getValue());
-                }).onValueChange(event ->
-                {
-                    if (event.getValue()) {
-                        event.getButton().setDescription("Enable");
-                        event.getButton().setHighlighted(true);
-                    } else
-                    {
-                        event.getButton().setDescription("Disable");
-                        event.getButton().setHighlighted(false);
-                    }
-                })
-                .build();
+    public ButtonObserver<Boolean> infoBarObserver() {
+        return BooleanButtonObserver.create(settingsService.getIsInfoBarBind());
     }
-
 
     public ButtonObserver<Material> keyWhitePressObserver(MaterialPickerUI materialPickerUI) {
-        return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyWhitePressBind());
+        return keyMaterialObserver(materialPickerUI, settingsService.getKeyWhitePressBind());
     }
 
     public ButtonObserver<Material> keyWhiteReleaseObserver(MaterialPickerUI materialPickerUI) {
-        return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyWhiteReleaseBind());
+        return keyMaterialObserver(materialPickerUI, settingsService.getKeyWhiteReleaseBind());
     }
 
     public ButtonObserver<Material> keyDarkPressObserver(MaterialPickerUI materialPickerUI) {
-        return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyDarkPressBind());
+        return keyMaterialObserver(materialPickerUI, settingsService.getKeyDarkPressBind());
     }
 
     public ButtonObserver<Material> keyDarkReleaseBindObserver(MaterialPickerUI materialPickerUI) {
-        return keyMaterialButtonObserver(materialPickerUI, settingsService.getKeyDarkReleaseBind());
+        return keyMaterialObserver(materialPickerUI, settingsService.getKeyDarkReleaseBind());
     }
 
     public ButtonObserver<Boolean> isPianoCreatedObserver() {
         return ButtonObserver.<Boolean>builder()
-                .observable(settingsService.getIsPianoPlacedBind())
+                .withObserver(settingsService.getIsPianoPlacedBind())
                 .onValueChange(event ->
                 {
                  //   event.getButton().setActive(event.getValue());
                 }).build();
     }
 
-    private ButtonObserver<Material> keyMaterialButtonObserver(MaterialPickerUI materialPickerUI, Observable<Material> observable) {
+    private ButtonObserver<Material> keyMaterialObserver(MaterialPickerUI materialPickerUI, Observable<Material> observable) {
         return ButtonObserver.<Material>builder()
-                .observable(observable)
+                .withObserver(observable)
                 .onClick(event ->
                 {
                     materialPickerUI.setOnItemPicked((player, button) ->

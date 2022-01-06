@@ -1,6 +1,7 @@
 package jw.pianoplayer.data;
 
 import jw.spigot_fluent_api.data.Saveable;
+import jw.spigot_fluent_api.data.annotation.files.JsonFile;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,9 +9,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 
 @SpigotBean(lazyLoad = false)
+@JsonFile
 @Getter
 @Setter
-public class Settings implements Saveable
+public class Settings
 {
     public Boolean isInfoBar = false;
     public Boolean isPlaying = false;
@@ -23,15 +25,4 @@ public class Settings implements Saveable
     public Material keyDarkPress =  Material.POLISHED_BLACKSTONE_BRICK_SLAB;
     public Material keyDarkRelease = Material.POLISHED_BLACKSTONE;
     public Location location;
-
-
-    @Override
-    public boolean load() {
-        return false;
-    }
-
-    @Override
-    public boolean save() {
-        return false;
-    }
 }

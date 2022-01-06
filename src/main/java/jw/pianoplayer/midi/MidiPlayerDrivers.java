@@ -16,10 +16,7 @@ import java.util.function.Consumer;
 @Getter
 @Setter
 public class MidiPlayerDrivers {
-
     private final MidiReceiver midiReceiver;
-
-
     private Sequence sequence;
     private Sequencer sequencer;
     private Synthesizer synthesizer;
@@ -38,7 +35,7 @@ public class MidiPlayerDrivers {
 
     public boolean isPlaying() {
         if (sequencer == null) return false;
-        else return sequencer.isRunning();
+         return sequencer.isRunning();
     }
     public void onStopPlaying(Consumer<?> event)
     {
@@ -60,7 +57,7 @@ public class MidiPlayerDrivers {
     {
         this.midiReceiver.setOnNoteOn(event);
     }
-    public void setOnNoteRelsesed(MidiEvent event)
+    public void setOnNoteReleased(MidiEvent event)
     {
         this.midiReceiver.setOnNoteOff(event);
     }
@@ -118,9 +115,7 @@ public class MidiPlayerDrivers {
             loaded = true;
         } catch (InvalidMidiDataException | IOException | MidiUnavailableException exception)
         {
-            FluentPlugin.logError("Error while loading midi file");
-            FluentPlugin.logError(exception.getMessage());
-            FluentPlugin.logError(exception.getCause().toString());
+            FluentPlugin.logException("Error while loading midi file",exception);
         }
     }
     public void setVolume(int volume) {

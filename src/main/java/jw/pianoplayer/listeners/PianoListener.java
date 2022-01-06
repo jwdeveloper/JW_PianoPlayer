@@ -1,4 +1,4 @@
-package jw.pianoplayer.events;
+package jw.pianoplayer.listeners;
 
 import jw.pianoplayer.services.PianoPlayerService;
 import jw.pianoplayer.services.SettingsService;
@@ -15,13 +15,13 @@ import java.util.HashMap;
 import java.util.function.Consumer;
 
 @SpigotBean(lazyLoad = false)
-public class PianoEventListener extends EventBase
+public class PianoListener extends EventBase
 {
     private final HashMap<Player, Consumer<Block>> playerConsumerHashMap;
     private final PianoPlayerService pianoPlayerService;
     private final SettingsService settingsService;
 
-    public PianoEventListener(PianoPlayerService pianoPlayerService, SettingsService settingsService)
+    public PianoListener(PianoPlayerService pianoPlayerService, SettingsService settingsService)
     {
         playerConsumerHashMap = new HashMap<>();
         this.pianoPlayerService = pianoPlayerService;

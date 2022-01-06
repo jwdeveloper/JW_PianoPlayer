@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 
@@ -63,7 +62,7 @@ public class PianoPlayerService {
             updateInfoBar();
             pianoKeys.get(note - settingsService.getStartNoteIndex()).onKeyPress(velocity != 0, note, velocity, channel);
         });
-        midiPlayerDrivers.setOnNoteRelsesed((note, velocity, channel) ->
+        midiPlayerDrivers.setOnNoteReleased((note, velocity, channel) ->
         {
             if (!settingsService.getIsPianoPlacedBind().get())
                 return;
@@ -84,12 +83,10 @@ public class PianoPlayerService {
     }
 
     private void updateInfoBar() {
-        if (bossBar == null)
+        if (bossBar == null || !midiPlayerDrivers.isPlaying())
             return;
-
         bossBar.setProgress(midiPlayerDrivers.getCurrentMS() / midiPlayerDrivers.getMS());
-
-        if (bossBar.getProgress() == 1)
+        if (bossBar.getProgress() > 0.9f)
             removeInfoBar();
     }
 
@@ -154,7 +151,7 @@ public class PianoPlayerService {
             settingsService.getIsPlayingBind().setAsync(true);
             return true;
         } catch (Exception e) {
-            FluentPlugin.logError("File from path " + midiFilePath + " can not by Piano player :<");
+            FluentPlugin.logException("File from path " + midiFilePath + " can not by Piano player :<",e);
             return false;
         }
     }

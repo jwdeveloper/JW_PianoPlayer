@@ -52,6 +52,6 @@ public class SettingsService {
     }
 
     public int getStartNoteIndex() {
-        return 21;
+        return 20;
     }
 }

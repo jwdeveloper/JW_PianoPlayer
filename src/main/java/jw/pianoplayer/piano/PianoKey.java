@@ -55,7 +55,6 @@ public class PianoKey implements PianoEvent {
             }
             for (Block b : blocks) {
                 b.setType(isBlack ? settingsService.getKeyDarkPressBind().get() :  settingsService.getKeyWhitePressBind().get());
-
             }
         });
     }

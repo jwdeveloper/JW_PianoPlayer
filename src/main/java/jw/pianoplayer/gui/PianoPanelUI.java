@@ -95,13 +95,12 @@ public class PianoPanelUI extends ChestUI {
                 .addObserver(pianoPanelController.isPianoPlayingObserver())
                 .buildAndAdd(this);
 
-
         var lightButton = ButtonObserverUI.builder()
                 .setTitle(titleFormatter("Lighting"))
                 .setLocation(3, 2)
                 .setMaterial(Material.LIGHT)
                 .addObserver(pianoPanelController.isPianoCreatedObserver())
-                .addObserver(pianoPanelController.lightButtonObserver())
+                .addObserver(pianoPanelController.lightObserver())
                 .buildAndAdd(this);
 
         var infoBarButton = ButtonObserverUI.builder()
@@ -109,7 +108,7 @@ public class PianoPanelUI extends ChestUI {
                 .setLocation(3, 4)
                 .setMaterial(Material.PAPER)
                 .addObserver(pianoPanelController.isPianoCreatedObserver())
-                .addObserver(pianoPanelController.infoBarButtonObserver())
+                .addObserver(pianoPanelController.infoBarObserver())
                 .buildAndAdd(this);
 
         var teleportButton = ButtonObserverUI.builder()
@@ -117,7 +116,7 @@ public class PianoPanelUI extends ChestUI {
                 .setLocation(3, 6)
                 .setMaterial(Material.ENDER_PEARL)
                 .addObserver(pianoPanelController.isPianoCreatedObserver())
-                .addObserver(pianoPanelController.teleportButtonObserver())
+                .addObserver(pianoPanelController.teleportObserver())
                 .buildAndAdd(this);
 
         var selectMidiFileButton = ButtonObserverUI.builder()
@@ -125,7 +124,7 @@ public class PianoPanelUI extends ChestUI {
                 .setLocation(2, 4)
                 .setMaterial(Material.NOTE_BLOCK)
                 .addObserver(pianoPanelController.isPianoCreatedObserver())
-                .addObserver(pianoPanelController.selectMidiFileButtonObserver(filePicker))
+                .addObserver(pianoPanelController.selectMidiFileObserver(filePicker))
                 .buildAndAdd(this);
 
         var volumeButton = ButtonObserverUI.builder()
@@ -133,10 +132,8 @@ public class PianoPanelUI extends ChestUI {
                 .setLocation(2, 6)
                 .setMaterial(Material.MUSIC_DISC_STRAD)
                 .addObserver(pianoPanelController.isPianoCreatedObserver())
-                .addObserver(pianoPanelController.volumeButtonObserver())
+                .addObserver(pianoPanelController.volumeObserver())
                 .buildAndAdd(this);
-
-
     }
 
     private String titleFormatter(String value)
