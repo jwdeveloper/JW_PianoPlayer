@@ -1,6 +1,5 @@
 package jw.pianoplayer;
 
-
 import jw.pianoplayer.services.SettingsService;
 import jw.spigot_fluent_api.dependency_injection.InjectionManager;
 import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
@@ -13,9 +12,10 @@ public final class Main extends FluentPlugin {
 
     @Override
     protected void OnConfiguration(PluginConfiguration configuration) {
-        configuration.withDependencyInjection();
-        configuration.withDebugMode();
-        configuration.withMetrics(13849);
+        configuration.useDataContext()
+                .useDependencyInjection()
+                .useDebugMode()
+                .useMetrics(13849);
     }
 
     @Override
@@ -27,6 +27,5 @@ public final class Main extends FluentPlugin {
     @Override
     protected void OnFluentPluginDisable() {
 
-        }
-
+    }
 }
