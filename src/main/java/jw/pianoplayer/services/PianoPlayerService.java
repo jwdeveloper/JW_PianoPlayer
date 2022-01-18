@@ -3,6 +3,8 @@ package jw.pianoplayer.services;
 import jw.pianoplayer.midi.MidiPlayerDrivers;
 import jw.pianoplayer.piano.PianoKey;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Inject;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Injection;
 import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,7 +16,7 @@ import org.bukkit.boss.BossBar;
 import java.io.File;
 import java.util.HashMap;
 
-@SpigotBean(lazyLoad = false)
+@Injection(lazyLoad = false)
 public class PianoPlayerService {
     private final int PIANO_KEYS = 88;
     private final SettingsService settingsService;
@@ -22,6 +24,7 @@ public class PianoPlayerService {
     private HashMap<Integer, PianoKey> pianoKeys;
     private BossBar bossBar;
 
+    @Inject
     public PianoPlayerService(SettingsService settings, MidiPlayerDrivers midiPlayerDrivers) {
 
         this.midiPlayerDrivers = midiPlayerDrivers;

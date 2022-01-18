@@ -3,15 +3,16 @@ package jw.pianoplayer.data;
 import jw.spigot_fluent_api.data.Saveable;
 import jw.spigot_fluent_api.data.annotation.files.JsonFile;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Injection;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
-@SpigotBean(lazyLoad = false)
+@Injection(lazyLoad = false)
 @JsonFile
-@Getter
-@Setter
+@Data
 public class Settings
 {
     public Boolean isInfoBar = false;

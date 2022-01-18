@@ -3,7 +3,10 @@ package jw.pianoplayer.midi;
 import jw.pianoplayer.events.MidiEvent;
 import jw.pianoplayer.midi.MidiReceiver;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Inject;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Injection;
 import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,11 +15,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-@SpigotBean
-@Getter
-@Setter
+@Injection
+@Data
 public class MidiPlayerDrivers {
-    private final MidiReceiver midiReceiver;
+
+    @Inject
+    private MidiReceiver midiReceiver;
+
     private Sequence sequence;
     private Sequencer sequencer;
     private Synthesizer synthesizer;
@@ -27,10 +32,6 @@ public class MidiPlayerDrivers {
     private Consumer<?> OnStart;
     private Consumer<?> OnStop;
 
-    public MidiPlayerDrivers(MidiReceiver midiReceiver)
-    {
-        this.midiReceiver = midiReceiver;
-    }
 
 
     public boolean isPlaying() {

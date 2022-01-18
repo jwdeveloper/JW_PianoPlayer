@@ -2,19 +2,23 @@ package jw.pianoplayer.gui;
 
 import jw.spigot_fluent_api.dependency_injection.InjectionType;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Inject;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Injection;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.enums.LifeTime;
 import jw.spigot_fluent_api.fluent_gui.button.button_observer.ButtonObserverUI;
 import jw.spigot_fluent_api.fluent_gui.implementation.accept_ui.AcceptUI;
 import jw.spigot_fluent_api.fluent_gui.implementation.chest_ui.ChestUI;
 import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.FilePickerUI;
 import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.MaterialPickerUI;
 import jw.spigot_fluent_api.utilites.messages.Emoticons;
-import jw.spigot_fluent_api.utilites.messages.MessageBuilder;
+import jw.spigot_fluent_api.fluent_message.MessageBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-@SpigotBean(injectionType = InjectionType.TRANSIENT)
+@Injection(lifeTime = LifeTime.TRANSIENT)
 public class PianoPanelUI extends ChestUI {
+    @Inject
     private final PianoPanelController pianoPanelController;
 
     public PianoPanelUI(PianoPanelController pianoPanelController) {

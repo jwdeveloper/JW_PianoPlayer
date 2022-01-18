@@ -1,8 +1,7 @@
 package jw.pianoplayer.gui;
 
-import jw.spigot_fluent_api.utilites.messages.MessageBuilder;
+import jw.spigot_fluent_api.fluent_message.MessageBuilder;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 
 public class PianoMessages {
     public static String placePianoError() {

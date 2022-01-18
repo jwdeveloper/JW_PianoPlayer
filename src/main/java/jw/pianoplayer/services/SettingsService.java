@@ -2,15 +2,17 @@ package jw.pianoplayer.services;
 
 import jw.pianoplayer.data.Settings;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Inject;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Injection;
 import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
-import jw.spigot_fluent_api.utilites.binding.Observable;
+import jw.spigot_fluent_api.desing_patterns.observer.fields.Observable;
 import jw.spigot_fluent_api.utilites.files.FileUtility;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
-@SpigotBean(lazyLoad = false)
+@Injection(lazyLoad = false)
 @Getter
 @Setter
 public class SettingsService {
@@ -29,10 +31,8 @@ public class SettingsService {
     private Observable<Location> locationBind;
 
 
-    private final Settings settings;
-
+    @Inject
     public SettingsService(Settings settings) {
-        this.settings = settings;
         volumeBind = new Observable<>(settings, "volume");
         isInfoBarBind = new Observable<>(settings, "isInfoBar");
         isPianoPlacedBind = new Observable<>(settings, "isPianoPlaced");

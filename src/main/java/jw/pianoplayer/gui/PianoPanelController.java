@@ -6,26 +6,29 @@ import jw.pianoplayer.services.SettingsService;
 import jw.pianoplayer.utilites.AudioUtility;
 import jw.spigot_fluent_api.dependency_injection.InjectionType;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Inject;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Injection;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.enums.LifeTime;
 import jw.spigot_fluent_api.fluent_gui.button.button_observer.ButtonObserver;
 import jw.spigot_fluent_api.fluent_gui.implementation.accept_ui.AcceptUI;
 import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.FilePickerUI;
 import jw.spigot_fluent_api.fluent_gui.implementation.picker_list_ui.MaterialPickerUI;
 import jw.spigot_fluent_api.fluent_tasks.FluentTasks;
-import jw.spigot_fluent_api.utilites.binding.Observable;
-import jw.spigot_fluent_api.utilites.binding.implementation.BooleanButtonObserver;
-import jw.spigot_fluent_api.utilites.messages.MessageBuilder;
+import jw.spigot_fluent_api.desing_patterns.observer.fields.Observable;
+import jw.spigot_fluent_api.fluent_message.MessageBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
 
-@SpigotBean(injectionType = InjectionType.TRANSIENT)
+@Injection(lifeTime = LifeTime.TRANSIENT)
 public class PianoPanelController {
     private final PianoPlayerService pianoPlayerService;
     private final PianoListener pianoEventListener;
     private final SettingsService settingsService;
     private PianoPanelUI pianoPanelUI;
 
+    @Inject
     public PianoPanelController(PianoPlayerService pianoPlayerService,
                                 PianoListener pianoEventListener,
                                 SettingsService settingsService) {
@@ -201,11 +204,13 @@ public class PianoPanelController {
     }
 
     public ButtonObserver<Boolean> lightObserver() {
-        return BooleanButtonObserver.create(settingsService.getIsLightEnableBind());
+        return null;
+      //  return BooleanButtonObserver.create(settingsService.getIsLightEnableBind());
     }
 
     public ButtonObserver<Boolean> infoBarObserver() {
-        return BooleanButtonObserver.create(settingsService.getIsInfoBarBind());
+        return null;
+     //   return BooleanButtonObserver.create(settingsService.getIsInfoBarBind());
     }
 
     public ButtonObserver<Material> keyWhitePressObserver(MaterialPickerUI materialPickerUI) {

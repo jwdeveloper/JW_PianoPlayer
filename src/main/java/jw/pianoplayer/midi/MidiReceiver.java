@@ -2,16 +2,17 @@ package jw.pianoplayer.midi;
 
 import jw.pianoplayer.events.MidiEvent;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Injection;
 import jw.spigot_fluent_api.fluent_plugin.FluentPlugin;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.sound.midi.*;
 import java.util.function.Consumer;
 
-@SpigotBean
-@Getter
-@Setter
+@Injection
+@Data
 public class MidiReceiver implements Receiver {
     private MidiEvent onNoteOn = (a, b, c) -> {
     };

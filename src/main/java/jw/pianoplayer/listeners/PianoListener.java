@@ -3,6 +3,8 @@ package jw.pianoplayer.listeners;
 import jw.pianoplayer.services.PianoPlayerService;
 import jw.pianoplayer.services.SettingsService;
 import jw.spigot_fluent_api.dependency_injection.SpigotBean;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Inject;
+import jw.spigot_fluent_api.desing_patterns.dependecy_injection.annotations.Injection;
 import jw.spigot_fluent_api.fluent_events.EventBase;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -14,13 +16,14 @@ import org.bukkit.event.server.PluginEnableEvent;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
-@SpigotBean(lazyLoad = false)
+@Injection(lazyLoad = false)
 public class PianoListener extends EventBase
 {
     private final HashMap<Player, Consumer<Block>> playerConsumerHashMap;
     private final PianoPlayerService pianoPlayerService;
     private final SettingsService settingsService;
 
+    @Inject
     public PianoListener(PianoPlayerService pianoPlayerService, SettingsService settingsService)
     {
         playerConsumerHashMap = new HashMap<>();
